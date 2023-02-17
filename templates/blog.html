@@ -1,0 +1,12 @@
+
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %} Nathan's Blog {% endblock %}
+
+{%block page_content %}
+
+{% filter markdown %}
+{{ mkd_text }}
+{% endfilter %}
+{% endblock %}

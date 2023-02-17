@@ -2,18 +2,19 @@ from flask import Flask
 from flask import request
 from flask import render_template
 from flask import session, redirect,url_for, flash
+from flask.cli import FlaskGroup
 from datetime import datetime
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 import sys
 import os.path
 
 
-from flask_script import Manager
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.validators import Required
+from wtforms.validators import InputRequired
+from flaskext.markdown import Markdown
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -22,13 +23,14 @@ app.wsgi_app = ProxyFix(app.wsgi_app)
 filename = 'secret_key'
 app.config['SECRET_KEY'] = open(filename, 'rb').read()
 
-
+cli=FlaskGroup(app)
 bootstrap = Bootstrap(app)
-manager = Manager(app)
 moment = Moment(app)
+Markdown(app)
+
 
 class NameForm(FlaskForm):
-    name = StringField('What is your name?', validators=[Required()])
+    name = StringField('What is your name?', validators=[InputRequired()])
     submit = SubmitField('Submit')
 
 @app.route('/', methods=['GET', 'POST'])
@@ -51,6 +53,14 @@ def user(name):
 @app.route('/resume')
 def resume():
     return render_template('resume.html')
+
+@app.route('/blog')
+def blog():
+    mkd_text="## Welcome to the Blog"
+    with open('iceland.md','r') as f:
+        mkd_text=f.read()
+    return render_template('blog.html',mkd_text=mkd_text)
+
 
 
 @app.errorhandler(404)
